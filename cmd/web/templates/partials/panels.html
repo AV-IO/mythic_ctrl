@@ -1,5 +1,6 @@
 {{define "status_panel"}}
 {{with .Status}}
+<span class="status-overall overall-{{.Overall}}" aria-hidden="true"></span>
 {{if .Error}}
 <p class="status-error">⚠ {{.Error}}</p>
 {{else}}

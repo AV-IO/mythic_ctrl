@@ -42,6 +42,13 @@ type StatusModel struct {
 	Total   int
 	Running int
 	Error   string
+	// Overall drives the status card's glowing border, and reflects only the
+	// core "Containers" group — third-party Services may be stopped without
+	// affecting it. ok (green) only when every core container is running;
+	// error (red) as soon as any core container is stopped or unhealthy; warn
+	// (yellow) while a core container is transitioning; idle (grey) when there
+	// are no core containers.
+	Overall string
 }
 
 // rawState is the slice of a docker container summary we actually use, copied
@@ -75,7 +82,37 @@ func liveStatus() StatusModel {
 			}
 		}
 	}
+	// The border tracks only the core "Containers" group (index 0); third-party
+	// Services are allowed to be down.
+	model.Overall = coreOverall(model.Groups[0].Items, model.Error)
 	return model
+}
+
+// coreOverall rolls the core containers up into the border colour: green only
+// when every core container is running & healthy, red the moment any is stopped
+// or unhealthy (a docker error is itself red), yellow while one is
+// transitioning, grey when there are no core containers at all.
+func coreOverall(core []ServiceStatus, dockerErr string) string {
+	if dockerErr != "" {
+		return "error"
+	}
+	if len(core) == 0 {
+		return "idle"
+	}
+	warn := false
+	for _, s := range core {
+		switch s.Class {
+		case "error", "idle":
+			// unhealthy OR stopped/not-started core container -> red.
+			return "error"
+		case "warn":
+			warn = true
+		}
+	}
+	if warn {
+		return "warn"
+	}
+	return "ok"
 }
 
 // statusFor maps each known service name to its live state, preserving the

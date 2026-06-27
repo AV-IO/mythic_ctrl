@@ -173,6 +173,36 @@ code { background: var(--panel-2); padding: 0.1rem 0.35rem; border-radius: 4px; 
 }
 
 /* Graphical status card. */
+/* Wholistic border glow: the worst service state colours the whole card, the
+   same colour model as the status dots. The static border colour lives on the
+   card (via :has), but the *pulse* lives on the .status-overall marker — an
+   edge-hugging overlay rendered inside the swapped partial. Because the partial
+   (marker + dots) is re-rendered together on every 5s poll, their pulse
+   animations restart at the same instant and stay in phase with each other,
+   reusing the dots' own status-pulse timing. */
+.status-card { position: relative; transition: border-color 0.4s ease; }
+.status-card:has(.overall-ok) { border-color: var(--ok); }
+.status-card:has(.overall-warn) { border-color: var(--warn); }
+.status-card:has(.overall-error) { border-color: var(--error); }
+
+.status-overall {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  pointer-events: none;
+}
+.status-overall.overall-ok {
+  box-shadow: 0 0 14px rgba(46, 204, 113, 0.45);
+}
+.status-overall.overall-warn {
+  box-shadow: 0 0 14px rgba(241, 196, 15, 0.45);
+  animation: status-pulse 1.4s ease-in-out infinite;
+}
+.status-overall.overall-error {
+  box-shadow: 0 0 14px rgba(231, 76, 60, 0.5);
+  animation: status-pulse 1.1s ease-in-out infinite;
+}
+
 .status-card .card-head { margin-bottom: 0.75rem; }
 .status-summary { display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 1rem; }
 .status-count { font-size: 1.8rem; font-weight: 700; line-height: 1; color: var(--ok); }
