@@ -142,10 +142,16 @@ func resetDatabase(useVolume bool) { mgr().ResetDatabase(useVolume) }
 
 // installFromGitHub installs a service from a git URL, mirroring the
 // `mythic-cli install github <url> [branch]` command. Note the upstream return
-// order: (error, []string) where the slice is any additional services pulled in.
+// order: (error, map[string]string) where the map describes any additional
+// services pulled in (name -> source/path). We flatten it to a name slice.
 func installFromGitHub(url, branch string, force, keepVolume bool) ([]string, error) {
 	err, additional := internal.InstallService(url, branch, force, keepVolume)
-	return additional, err
+	names := make([]string, 0, len(additional))
+	for name := range additional {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names, err
 }
 
 // ---- Service inventory ------------------------------------------------------
