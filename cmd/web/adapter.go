@@ -146,12 +146,25 @@ func resetDatabase(useVolume bool) { mgr().ResetDatabase(useVolume) }
 // services pulled in (name -> source/path). We flatten it to a name slice.
 func installFromGitHub(url, branch string, force, keepVolume bool) ([]string, error) {
 	err, additional := internal.InstallService(url, branch, force, keepVolume)
+	return additionalNames(additional), err
+}
+
+// installFromFolder installs a service from a local folder on disk, mirroring
+// `mythic-cli install folder <path>`. The trailing "" matches the CLI call.
+func installFromFolder(path string, force, keepVolume bool) ([]string, error) {
+	err, additional := internal.InstallFolder(path, force, keepVolume, "")
+	return additionalNames(additional), err
+}
+
+// additionalNames flattens the (name -> path) map returned by the install
+// functions into a sorted slice of service names.
+func additionalNames(additional map[string]string) []string {
 	names := make([]string, 0, len(additional))
 	for name := range additional {
 		names = append(names, name)
 	}
 	sort.Strings(names)
-	return names, err
+	return names
 }
 
 // ---- Service inventory ------------------------------------------------------

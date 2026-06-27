@@ -109,6 +109,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 
 	// Install / services (protected).
 	mux.Handle("POST /install/github", s.requireAuth(http.HandlerFunc(s.handleInstallGitHub)))
+	mux.Handle("POST /install/upload", s.requireAuth(http.HandlerFunc(s.handleInstallUpload)))
 	mux.Handle("POST /install/remove", s.requireAuth(http.HandlerFunc(s.handleServiceRemove)))
 
 	// Images (protected).

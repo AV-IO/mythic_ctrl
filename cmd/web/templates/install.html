@@ -23,6 +23,20 @@
     </form>
   </section>
 
+  <section class="card warn-card">
+    <h2>Install from uploaded .zip</h2>
+    <p class="warn-text">⚠ The archive is unzipped and installed as a service — it runs third-party code on this host. Only upload archives you trust.</p>
+    <form hx-post="/install/upload" hx-target="#toast-zone" hx-swap="innerHTML"
+          hx-encoding="multipart/form-data"
+          hx-confirm="Unzip and install this archive as a service?">
+      <label>Service archive (.zip)
+        <input type="file" name="archive" accept=".zip" required>
+      </label>
+      <label class="check"><input type="checkbox" name="force"> Force reinstall</label>
+      <button type="submit" class="primary">Upload &amp; install</button>
+    </form>
+  </section>
+
   <section class="card">
     <h2>Installed 3rd-party services</h2>
     {{if .Installed}}
