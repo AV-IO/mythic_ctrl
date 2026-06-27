@@ -32,6 +32,22 @@
   </section>
 </main>
 {{template "scripts" .}}
+<script>
+  // Reveal masked (sensitive) config values while the field is focused, then
+  // re-mask on blur.
+  document.addEventListener("focusin", function (e) {
+    var el = e.target;
+    if (el.matches && el.matches('input[data-sensitive]')) {
+      el.type = "text";
+    }
+  });
+  document.addEventListener("focusout", function (e) {
+    var el = e.target;
+    if (el.matches && el.matches('input[data-sensitive]')) {
+      el.type = "password";
+    }
+  });
+</script>
 </body>
 </html>
 {{end}}
