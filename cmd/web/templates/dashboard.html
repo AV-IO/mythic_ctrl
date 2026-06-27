@@ -14,18 +14,24 @@
         <input type="text" name="services" placeholder="leave blank for ALL services (e.g. mythic_server mythic_postgres)">
       </label>
       <div class="btn-row">
-        <button hx-post="/control/start"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" class="primary">Start</button>
-        <button hx-post="/control/stop"    hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML">Stop</button>
-        <button hx-post="/control/restart" hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML">Restart</button>
-        <button hx-post="/control/build"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML">Build</button>
+        <button type="button" hx-post="/control/start"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this" class="primary">Start</button>
+        <button type="button" hx-post="/control/stop"    hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Stop</button>
+        <button type="button" hx-post="/control/restart" hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Restart</button>
+        <button type="button" hx-post="/control/build"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Build</button>
       </div>
+      <p class="muted hint">Start/Build can take a while — the button stays disabled until the operation finishes, then a result appears top-right and full output below.</p>
     </form>
+  </section>
+
+  <section class="card">
+    <h2>Last action output</h2>
+    <div id="action-output"><p class="muted">Output from the most recent start, stop, restart, or build appears here.</p></div>
   </section>
 
   <section class="card">
     <div class="card-head">
       <h2>Status</h2>
-      <button hx-get="/partials/status" hx-target="#status-panel" hx-swap="innerHTML" class="ghost">Refresh</button>
+      <button type="button" hx-get="/partials/status" hx-target="#status-panel" hx-swap="innerHTML" hx-disabled-elt="this" class="ghost">Refresh</button>
     </div>
     <div id="status-panel" hx-get="/partials/status" hx-trigger="load, every 5s" hx-swap="innerHTML">
       {{template "status_panel" .}}
@@ -35,7 +41,7 @@
   <section class="card">
     <div class="card-head">
       <h2>Health</h2>
-      <button hx-get="/partials/health" hx-target="#health-panel" hx-swap="innerHTML" class="ghost">Run health check</button>
+      <button type="button" hx-get="/partials/health" hx-include="#control-form" hx-target="#health-panel" hx-swap="innerHTML" hx-disabled-elt="this" class="ghost">Run health check</button>
     </div>
     <div id="health-panel"></div>
   </section>

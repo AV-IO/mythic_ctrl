@@ -35,42 +35,55 @@ func (s *Server) handleHealthPartial(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleStart(w http.ResponseWriter, r *http.Request) {
 	services := servicesFromForm(r)
-	if err := startServices(services); err != nil {
-		s.renderer.toast(w, "error", "Start failed: "+err.Error())
-		return
-	}
-	s.renderer.toast(w, "ok", actionMsg("Started", services))
+	out, err := startServices(services)
+	s.actionResult(w, "Start", actionMsg("Started", services), out, err)
 }
 
 func (s *Server) handleStop(w http.ResponseWriter, r *http.Request) {
 	services := servicesFromForm(r)
-	if err := stopServices(services); err != nil {
-		s.renderer.toast(w, "error", "Stop failed: "+err.Error())
-		return
-	}
-	s.renderer.toast(w, "ok", actionMsg("Stopped", services))
+	out, err := stopServices(services)
+	s.actionResult(w, "Stop", actionMsg("Stopped", services), out, err)
 }
 
 func (s *Server) handleRestart(w http.ResponseWriter, r *http.Request) {
 	services := servicesFromForm(r)
-	if err := stopServices(services); err != nil {
-		s.renderer.toast(w, "error", "Restart (stop phase) failed: "+err.Error())
+	stopOut, err := stopServices(services)
+	if err != nil {
+		s.actionResultRaw(w, "error", "Restart (stop phase) failed", stopOut)
 		return
 	}
-	if err := startServices(services); err != nil {
-		s.renderer.toast(w, "error", "Restart (start phase) failed: "+err.Error())
+	startOut, err := startServices(services)
+	out := stopOut + "\n" + startOut
+	if err != nil {
+		s.actionResultRaw(w, "error", "Restart (start phase) failed", out)
 		return
 	}
-	s.renderer.toast(w, "ok", actionMsg("Restarted", services))
+	s.actionResultRaw(w, "ok", actionMsg("Restarted", services), out)
 }
 
 func (s *Server) handleBuild(w http.ResponseWriter, r *http.Request) {
 	services := servicesFromForm(r)
-	if err := buildServices(services); err != nil {
-		s.renderer.toast(w, "error", "Build failed: "+err.Error())
+	out, err := buildServices(services)
+	s.actionResult(w, "Build", actionMsg("Built", services), out, err)
+}
+
+// actionResult renders the outcome of a control action: a toast plus the child
+// process's captured output (swapped out-of-band into the dashboard's output
+// panel). On error the captured output is what tells the operator why it failed.
+func (s *Server) actionResult(w http.ResponseWriter, verb, okMsg, output string, err error) {
+	if err != nil {
+		s.actionResultRaw(w, "error", verb+" failed", output)
 		return
 	}
-	s.renderer.toast(w, "ok", actionMsg("Built", services))
+	s.actionResultRaw(w, "ok", okMsg, output)
+}
+
+func (s *Server) actionResultRaw(w http.ResponseWriter, level, msg, output string) {
+	s.renderer.partial(w, "action_result", map[string]any{
+		"Level":   level,
+		"Message": msg,
+		"Output":  strings.TrimSpace(output),
+	})
 }
 
 // servicesFromForm extracts a list of service names from the "services" form

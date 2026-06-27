@@ -23,7 +23,6 @@ type Server struct {
 	host     string
 	port     int
 	renderer *renderer
-	sessions *sessionStore
 }
 
 // Serve builds the server, wires routes, and blocks until interrupted.
@@ -37,7 +36,6 @@ func Serve(host string, port int) error {
 		host:     host,
 		port:     port,
 		renderer: r,
-		sessions: newSessionStore(),
 	}
 
 	mux := http.NewServeMux()
@@ -46,7 +44,7 @@ func Serve(host string, port int) error {
 	addr := net.JoinHostPort(host, fmt.Sprintf("%d", port))
 	httpServer := &http.Server{
 		Addr:              addr,
-		Handler:           logRequests(mux),
+		Handler:           recoverPanics(logRequests(mux)),
 		ReadHeaderTimeout: 10 * time.Second,
 		// No write timeout: SSE log streams are long-lived.
 	}
@@ -68,6 +66,17 @@ func Serve(host string, port int) error {
 	}()
 
 	log.Printf("[+] Mythic web GUI listening on http://%s\n", addr)
+
+	// Print the login credentials so the operator can sign in without digging
+	// through the .env. These come straight from the local Mythic config; anyone
+	// who can read this terminal can already read that file.
+	adminUser, adminPass := adminCredentials()
+	if adminPass == "" {
+		log.Printf("[!] No %s set in the Mythic config — login is disabled until it is configured.\n", keyAdminPassword)
+	} else {
+		log.Printf("[+] Login credentials — user: %q  password: %q\n", adminUser, adminPass)
+	}
+
 	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
@@ -126,6 +135,24 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.Handle("POST /backup/restore-database", s.requireAuth(http.HandlerFunc(s.handleRestoreDatabase)))
 	mux.Handle("POST /backup/restore-files", s.requireAuth(http.HandlerFunc(s.handleRestoreFiles)))
 	mux.Handle("POST /backup/reset-database", s.requireAuth(http.HandlerFunc(s.handleResetDatabase)))
+}
+
+// recoverPanics turns a panic inside any handler into a logged 500 with a
+// short message body, instead of a silently-dropped connection. Reused CLI code
+// can panic (e.g. on an unexpected docker state); without this the browser sees
+// nothing. The client-side htmx:responseError handler then shows the message.
+func recoverPanics(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				log.Printf("[web] PANIC on %s %s: %v", r.Method, r.URL.Path, rec)
+				// Best-effort: if nothing was written yet this sets 500 + body;
+				// if the response already started (e.g. SSE) it's a no-op warning.
+				http.Error(w, fmt.Sprintf("internal error: %v", rec), http.StatusInternalServerError)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
 }
 
 // logRequests is a tiny access logger.

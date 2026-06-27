@@ -5,3 +5,10 @@
 {{define "health_panel"}}
 <pre class="console">{{.Health}}</pre>
 {{end}}
+
+{{define "action_result"}}
+<div class="toast toast-{{.Level}}">{{.Message}}</div>
+<div id="action-output" hx-swap-oob="innerHTML">
+  {{if .Output}}<pre class="console">{{.Output}}</pre>{{else}}<p class="muted">Completed with no output.</p>{{end}}
+</div>
+{{end}}

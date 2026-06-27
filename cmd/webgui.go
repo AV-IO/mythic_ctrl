@@ -24,13 +24,23 @@ GUI works even while Mythic itself is stopped. By default the server binds to
 127.0.0.1; exposing it to other interfaces should only be done behind a TLS
 reverse proxy.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		host, _ := cmd.Flags().GetString("host")
-		port, _ := cmd.Flags().GetInt("port")
-
 		// Initialize the manager (docker compose) exactly like the other
 		// subcommands do, so every reused method has a live manager.
 		manager.Initialize()
 
+		// Hidden child mode: when --exec-action is set, this process is a
+		// short-lived worker spawned by the running GUI to perform one service
+		// action (start/stop/build) in isolation. The upstream control code can
+		// os.Exit on docker errors; running it here means only this child dies,
+		// never the GUI. See cmd/web/control.go.
+		if action, _ := cmd.Flags().GetString("exec-action"); action != "" {
+			services, _ := cmd.Flags().GetString("exec-services")
+			web.RunControlAction(action, services) // runs the action and exits
+			return
+		}
+
+		host, _ := cmd.Flags().GetString("host")
+		port, _ := cmd.Flags().GetInt("port")
 		if err := web.Serve(host, port); err != nil {
 			log.Fatalf("[-] web gui exited: %v\n", err)
 		}
@@ -40,5 +50,13 @@ reverse proxy.`,
 func init() {
 	webguiCmd.Flags().String("host", "127.0.0.1", "Interface to bind the web GUI to")
 	webguiCmd.Flags().Int("port", 7444, "Port to serve the web GUI on")
+
+	// Internal plumbing for the out-of-process control worker (see control.go).
+	// Not meant for direct use, so they are hidden from help output.
+	webguiCmd.Flags().String("exec-action", "", "internal: run one control action then exit")
+	webguiCmd.Flags().String("exec-services", "", "internal: comma-separated services for --exec-action")
+	_ = webguiCmd.Flags().MarkHidden("exec-action")
+	_ = webguiCmd.Flags().MarkHidden("exec-services")
+
 	rootCmd.AddCommand(webguiCmd)
 }

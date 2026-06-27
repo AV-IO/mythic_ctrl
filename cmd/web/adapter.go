@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/MythicMeta/Mythic_CLI/cmd/config"
@@ -25,6 +26,15 @@ const (
 	keyAdminUser     = "MYTHIC_ADMIN_USER"
 	keyAdminPassword = "MYTHIC_ADMIN_PASSWORD"
 )
+
+// keyJWTSecret is the Mythic config key whose value signs our session JWTs.
+const keyJWTSecret = "JWT_SECRET"
+
+// jwtSecret returns the signing secret from the Mythic config (.env). Empty if
+// unset — callers must treat an empty secret as "auth unavailable".
+func jwtSecret() []byte {
+	return []byte(config.GetMythicEnv().GetString(keyJWTSecret))
+}
 
 // adminCredentials returns the configured admin username and password.
 func adminCredentials() (user, pass string) {
@@ -71,18 +81,30 @@ func setConfig(key, value string) {
 
 func mgr() manager.CLIManager { return manager.GetManager() }
 
-// startServices starts the given services (empty = all). rebuildOnStart=false.
-func startServices(services []string) error {
-	return mgr().StartServices(services, false)
-}
-
-func stopServices(services []string) error {
-	// deleteImages=false, keepVolume=true: a GUI "stop" should not be destructive.
-	return mgr().StopServices(services, false, true)
-}
-
-func buildServices(services []string) error {
-	return mgr().BuildServices(services, true)
+// runServiceAction dispatches a control action to the internal.Service* function
+// — the SAME ones the `mythic-cli start/stop/build` commands call — not the bare
+// manager methods. The internal layer expands an empty list to "all services",
+// (re)generates the docker-compose file, and resolves dependencies; the manager
+// methods do none of that, so calling them directly with an empty slice returns
+// instantly without starting anything.
+//
+// IMPORTANT: these functions can log.Fatal/os.Exit on docker errors (a failed
+// compose up, a missing nginx config file, ...). That would kill the whole GUI,
+// which recoverPanics cannot prevent. So this never runs inside a request: it is
+// invoked only in a CHILD process via RunControlAction (see control.go), where an
+// os.Exit terminates the child alone and the parent reports the failure.
+func runServiceAction(action string, services []string) error {
+	switch action {
+	case "start":
+		return internal.ServiceStart(services, false)
+	case "stop":
+		// keepVolume=true so a GUI stop never deletes data volumes.
+		return internal.ServiceStop(services, true)
+	case "build":
+		return internal.ServiceBuild(services, false)
+	default:
+		return fmt.Errorf("unknown control action %q", action)
+	}
 }
 
 func removeServices(services []string) error {

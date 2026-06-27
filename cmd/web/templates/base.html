@@ -28,11 +28,37 @@
 
 {{define "scripts"}}
 <script>
-  // Clear a toast after a few seconds.
+  // Render a toast safely (text only, no HTML injection).
+  function showToast(level, msg) {
+    var zone = document.getElementById("toast-zone");
+    if (!zone) { return; }
+    var div = document.createElement("div");
+    div.className = "toast toast-" + level;
+    div.textContent = msg;
+    zone.innerHTML = "";
+    zone.appendChild(div);
+    setTimeout(function () { if (zone.firstChild === div) { zone.innerHTML = ""; } }, 6000);
+  }
+
+  // Auto-clear toasts that arrive via a normal swap.
   document.body.addEventListener("htmx:afterSwap", function (e) {
     if (e.target && e.target.id === "toast-zone") {
-      setTimeout(function () { e.target.innerHTML = ""; }, 5000);
+      setTimeout(function () { e.target.innerHTML = ""; }, 6000);
     }
+  });
+
+  // htmx does NOT swap non-2xx responses by default, so without this a 500
+  // would look like "nothing happened". Surface server + network errors.
+  document.body.addEventListener("htmx:responseError", function (e) {
+    var xhr = e.detail.xhr;
+    var body = (xhr.responseText || "").trim().slice(0, 300);
+    showToast("error", "Request failed (" + xhr.status + ")" + (body ? ": " + body : ""));
+  });
+  document.body.addEventListener("htmx:sendError", function () {
+    showToast("error", "Network error — could not reach the server.");
+  });
+  document.body.addEventListener("htmx:timeout", function () {
+    showToast("warn", "Request timed out — the operation may still be running.");
   });
 </script>
 {{end}}
