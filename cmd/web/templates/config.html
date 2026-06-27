@@ -1,0 +1,37 @@
+{{define "config"}}
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "nav" .}}
+<main class="container">
+  <h1>Configuration</h1>
+  <p class="muted">Values are read from and written to the Mythic <code>.env</code>. Restart affected services to apply changes.</p>
+
+  <section class="card">
+    <table class="config-table">
+      <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+      <tbody>
+        {{range .Entries}}
+        <tr>
+          <td class="key" title="{{.Help}}">{{.Key}}</td>
+          <td>
+            <form id="cfg-{{.Key}}" hx-post="/config/set" hx-target="#toast-zone" hx-swap="innerHTML" class="cfg-row">
+              <input type="hidden" name="key" value="{{.Key}}">
+              <input
+                type="{{if sensitive .Key}}password{{else}}text{{end}}"
+                name="value" value="{{.Value}}"
+                {{if sensitive .Key}}data-sensitive="1"{{end}}>
+            </form>
+          </td>
+          <td><button type="submit" form="cfg-{{.Key}}" class="ghost">Save</button></td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </section>
+</main>
+{{template "scripts" .}}
+</body>
+</html>
+{{end}}

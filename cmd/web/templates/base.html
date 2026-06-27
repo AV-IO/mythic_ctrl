@@ -1,0 +1,38 @@
+{{define "head"}}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mythic Control</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+{{end}}
+
+{{define "nav"}}
+<header class="topbar">
+  <div class="brand">Mythic&nbsp;Control</div>
+  <nav>
+    <a href="/" class="{{if eq .Active "dashboard"}}active{{end}}">Dashboard</a>
+    <a href="/config" class="{{if eq .Active "config"}}active{{end}}">Config</a>
+    <a href="/logs" class="{{if eq .Active "logs"}}active{{end}}">Logs</a>
+    <a href="/install" class="{{if eq .Active "install"}}active{{end}}">Install</a>
+    <a href="/volumes" class="{{if eq .Active "volumes"}}active{{end}}">Volumes</a>
+    <a href="/backup" class="{{if eq .Active "backup"}}active{{end}}">Backup</a>
+  </nav>
+  <form method="post" action="/logout" class="logout">
+    <button type="submit">Log out</button>
+  </form>
+</header>
+<div id="toast-zone" aria-live="polite"></div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+  // Clear a toast after a few seconds.
+  document.body.addEventListener("htmx:afterSwap", function (e) {
+    if (e.target && e.target.id === "toast-zone") {
+      setTimeout(function () { e.target.innerHTML = ""; }, 5000);
+    }
+  });
+</script>
+{{end}}

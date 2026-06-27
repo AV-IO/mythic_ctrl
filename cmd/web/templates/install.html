@@ -1,0 +1,53 @@
+{{define "install"}}
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "nav" .}}
+<main class="container">
+  <h1>Install services</h1>
+
+  <section class="card warn-card">
+    <h2>Install from GitHub / GitLab</h2>
+    <p class="warn-text">⚠ Installing an agent or C2 profile runs third-party code from the internet on this host. Only install repositories you trust.</p>
+    <form hx-post="/install/github" hx-target="#toast-zone" hx-swap="innerHTML"
+          hx-confirm="Install third-party code from this repository?">
+      <label>Repository URL
+        <input type="text" name="url" placeholder="https://github.com/MythicAgents/apollo" required>
+      </label>
+      <label>Branch (optional)
+        <input type="text" name="branch" placeholder="main">
+      </label>
+      <label class="check"><input type="checkbox" name="force"> Force reinstall</label>
+      <button type="submit" class="primary">Install</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Installed 3rd-party services</h2>
+    {{if .Installed}}
+    <table class="config-table">
+      <tbody>
+        {{range .Installed}}
+        <tr>
+          <td class="key">{{.}}</td>
+          <td>
+            <form hx-post="/install/remove" hx-target="#toast-zone" hx-swap="innerHTML"
+                  hx-confirm="Stop and remove containers for {{.}}?">
+              <input type="hidden" name="service" value="{{.}}">
+              <button type="submit" class="ghost danger">Remove containers</button>
+            </form>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="muted">No 3rd-party services installed.</p>
+    {{end}}
+  </section>
+</main>
+{{template "scripts" .}}
+</body>
+</html>
+{{end}}

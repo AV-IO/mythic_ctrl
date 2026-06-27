@@ -1,0 +1,62 @@
+{{define "logs"}}
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "nav" .}}
+<main class="container">
+  <h1>Logs</h1>
+
+  <section class="card">
+    <div class="btn-row">
+      <select id="log-service">
+        <option value="">— select a service —</option>
+        {{range .Services}}
+        <option value="{{.}}" {{if eq . $.Selected}}selected{{end}}>{{.}}</option>
+        {{end}}
+      </select>
+      <button id="log-start" class="primary">Follow</button>
+      <button id="log-stop" class="ghost">Stop</button>
+      <button id="log-clear" class="ghost">Clear</button>
+    </div>
+    <pre id="log-output" class="console log-stream"></pre>
+  </section>
+</main>
+{{template "scripts" .}}
+<script>
+  (function () {
+    var es = null;
+    var out = document.getElementById("log-output");
+    var sel = document.getElementById("log-service");
+
+    function stop() {
+      if (es) { es.close(); es = null; }
+    }
+    function start() {
+      stop();
+      var svc = sel.value;
+      if (!svc) { return; }
+      out.textContent += "\n--- following " + svc + " ---\n";
+      es = new EventSource("/logs/stream?service=" + encodeURIComponent(svc));
+      es.onmessage = function (e) {
+        out.textContent += e.data + "\n";
+        out.scrollTop = out.scrollHeight;
+      };
+      es.addEventListener("error", function (e) {
+        if (e.data) { out.textContent += "[error] " + e.data + "\n"; }
+      });
+      es.onerror = function () {
+        out.textContent += "\n--- stream closed ---\n";
+        stop();
+      };
+    }
+
+    document.getElementById("log-start").addEventListener("click", start);
+    document.getElementById("log-stop").addEventListener("click", stop);
+    document.getElementById("log-clear").addEventListener("click", function () { out.textContent = ""; });
+    if (sel.value) { start(); }
+  })();
+</script>
+</body>
+</html>
+{{end}}

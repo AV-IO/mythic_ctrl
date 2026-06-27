@@ -1,0 +1,60 @@
+{{define "backup"}}
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "nav" .}}
+<main class="container">
+  <h1>Backup &amp; restore</h1>
+
+  <section class="card">
+    <h2>Backup</h2>
+    <form class="stack" hx-post="/backup/database" hx-target="#toast-zone" hx-swap="innerHTML">
+      <label>Backup database to path
+        <input type="text" name="path" placeholder="/tmp/mythic-db-backup" required>
+      </label>
+      <button type="submit">Backup database</button>
+    </form>
+    <form class="stack" hx-post="/backup/files" hx-target="#toast-zone" hx-swap="innerHTML">
+      <label>Backup files to path
+        <input type="text" name="path" placeholder="/tmp/mythic-files-backup" required>
+      </label>
+      <button type="submit">Backup files</button>
+    </form>
+  </section>
+
+  <section class="card warn-card">
+    <h2>Restore</h2>
+    <p class="warn-text">⚠ Restoring overwrites current data.</p>
+    <form class="stack" hx-post="/backup/restore-database" hx-target="#toast-zone" hx-swap="innerHTML"
+          hx-confirm="Restore database from this path? Current data will be overwritten.">
+      <label>Restore database from path
+        <input type="text" name="path" required>
+      </label>
+      <button type="submit" class="danger">Restore database</button>
+    </form>
+    <form class="stack" hx-post="/backup/restore-files" hx-target="#toast-zone" hx-swap="innerHTML"
+          hx-confirm="Restore files from this path? Current files will be overwritten.">
+      <label>Restore files from path
+        <input type="text" name="path" required>
+      </label>
+      <button type="submit" class="danger">Restore files</button>
+    </form>
+  </section>
+
+  <section class="card warn-card">
+    <h2>Reset database</h2>
+    <p class="warn-text">⚠ This wipes the Mythic database completely. Type <code>RESET</code> to confirm.</p>
+    <form class="stack" hx-post="/backup/reset-database" hx-target="#toast-zone" hx-swap="innerHTML"
+          hx-confirm="Wipe the Mythic database? This cannot be undone.">
+      <label>Confirmation
+        <input type="text" name="confirm" placeholder="RESET" required>
+      </label>
+      <button type="submit" class="danger">Reset database</button>
+    </form>
+  </section>
+</main>
+{{template "scripts" .}}
+</body>
+</html>
+{{end}}

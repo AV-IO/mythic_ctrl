@@ -1,0 +1,22 @@
+{{define "login"}}
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body class="login-body">
+  <main class="login-card">
+    <h1>Mythic&nbsp;Control</h1>
+    <p class="muted">Sign in with your Mythic admin credentials.</p>
+    {{if .Error}}<div class="toast toast-error">{{.Error}}</div>{{end}}
+    <form method="post" action="/login">
+      <label>Username
+        <input type="text" name="username" autocomplete="username" autofocus>
+      </label>
+      <label>Password
+        <input type="password" name="password" autocomplete="current-password">
+      </label>
+      <button type="submit" class="primary">Sign in</button>
+    </form>
+  </main>
+</body>
+</html>
+{{end}}

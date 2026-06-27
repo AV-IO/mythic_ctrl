@@ -1,0 +1,63 @@
+{{define "dashboard"}}
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "nav" .}}
+<main class="container">
+  <h1>Dashboard</h1>
+
+  <section class="card">
+    <h2>Service control</h2>
+    <form id="control-form" class="control">
+      <label>Target services
+        <input type="text" name="services" placeholder="leave blank for ALL services (e.g. mythic_server mythic_postgres)">
+      </label>
+      <div class="btn-row">
+        <button hx-post="/control/start"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" class="primary">Start</button>
+        <button hx-post="/control/stop"    hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML">Stop</button>
+        <button hx-post="/control/restart" hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML">Restart</button>
+        <button hx-post="/control/build"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML">Build</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Status</h2>
+      <button hx-get="/partials/status" hx-target="#status-panel" hx-swap="innerHTML" class="ghost">Refresh</button>
+    </div>
+    <div id="status-panel" hx-get="/partials/status" hx-trigger="load, every 5s" hx-swap="innerHTML">
+      {{template "status_panel" .}}
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Health</h2>
+      <button hx-get="/partials/health" hx-target="#health-panel" hx-swap="innerHTML" class="ghost">Run health check</button>
+    </div>
+    <div id="health-panel"></div>
+  </section>
+
+  <section class="card">
+    <h2>Connection info</h2>
+    <pre class="console">{{.Connection}}</pre>
+  </section>
+
+  {{if or .MythicServices .ThirdPartyServices}}
+  <section class="card">
+    <h2>Known services</h2>
+    <p class="muted">Mythic core</p>
+    <ul class="chips">{{range .MythicServices}}<li>{{.}}</li>{{end}}</ul>
+    {{if .ThirdPartyServices}}
+    <p class="muted">Installed 3rd-party</p>
+    <ul class="chips">{{range .ThirdPartyServices}}<li>{{.}}</li>{{end}}</ul>
+    {{end}}
+  </section>
+  {{end}}
+</main>
+{{template "scripts" .}}
+</body>
+</html>
+{{end}}

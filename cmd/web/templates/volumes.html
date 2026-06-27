@@ -1,0 +1,52 @@
+{{define "volumes"}}
+<!doctype html>
+<html lang="en">
+{{template "head" .}}
+<body>
+{{template "nav" .}}
+<main class="container">
+  <h1>Volumes &amp; images</h1>
+
+  <section class="card">
+    <h2>Volume information</h2>
+    <pre class="console">{{.VolumeInfo}}</pre>
+  </section>
+
+  <section class="card">
+    <h2>Remove a volume</h2>
+    <form hx-post="/volumes/remove" hx-target="#toast-zone" hx-swap="innerHTML"
+          hx-confirm="Permanently delete this docker volume? Data will be lost.">
+      <label>Volume name
+        <input type="text" name="volume" placeholder="mythic_postgres_volume" required>
+      </label>
+      <button type="submit" class="ghost danger">Remove volume</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Images</h2>
+    <form class="stack" hx-post="/images/save" hx-target="#toast-zone" hx-swap="innerHTML">
+      <label>Save images — services (blank = all)
+        <input type="text" name="services" placeholder="mythic_server">
+      </label>
+      <label>Output path
+        <input type="text" name="output" placeholder="/tmp/mythic-images.tar" required>
+      </label>
+      <button type="submit">Save images</button>
+    </form>
+    <form class="stack" hx-post="/images/load" hx-target="#toast-zone" hx-swap="innerHTML">
+      <label>Load images — input path
+        <input type="text" name="path" placeholder="/tmp/mythic-images.tar" required>
+      </label>
+      <button type="submit">Load images</button>
+    </form>
+    <form hx-post="/images/remove" hx-target="#toast-zone" hx-swap="innerHTML"
+          hx-confirm="Remove unused Mythic images?">
+      <button type="submit" class="ghost danger">Remove unused images</button>
+    </form>
+  </section>
+</main>
+{{template "scripts" .}}
+</body>
+</html>
+{{end}}
