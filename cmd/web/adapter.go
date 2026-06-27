@@ -111,9 +111,11 @@ func removeServices(services []string) error {
 	return mgr().RemoveServices(services, true)
 }
 
-// connectionInfoText returns the printed connection info (URLs, ports).
-func connectionInfoText() string {
-	return captureStdout(func() { mgr().PrintConnectionInfo() })
+// connectionInfo returns the structured connection details (hosts, ports, bind
+// scope) for the graphical Connection info card, built from the same .env config
+// the upstream PrintConnectionInfo() prints.
+func connectionInfo() ConnectionModel {
+	return connectionModel(config.GetMythicEnv())
 }
 
 // volumeInfoText returns the printed volume table.

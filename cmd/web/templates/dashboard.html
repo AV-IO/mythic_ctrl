@@ -35,7 +35,7 @@
 
   <section class="card">
     <h2>Connection info</h2>
-    <pre class="console">{{.Connection}}</pre>
+    {{template "connection_panel" .Connection}}
   </section>
 
   {{if or .MythicServices .ThirdPartyServices}}

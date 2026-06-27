@@ -31,6 +31,27 @@
 </div>
 {{end}}
 
+{{define "connection_panel"}}
+{{range .Groups}}
+<div class="conn-group">
+  <h3 class="conn-group-title">{{.Title}} <span class="status-group-count">{{len .Items}}</span></h3>
+  <ul class="conn-list">
+    {{range .Items}}
+    <li class="conn-item">
+      <button type="button" class="conn-name" data-copy="{{.Address}}" title="Copy access URI to clipboard">{{.Name}}</button>
+      <span class="conn-port" title="Listening port">:<b>{{.Port}}</b></span>
+      {{if .BoundLocal}}
+      <span class="conn-bind bind-local" title="Bound to 127.0.0.1 only — not reachable from other hosts">🔒 localhost</span>
+      {{else}}
+      <span class="conn-bind bind-open" title="Bound to all interfaces — reachable from other hosts">🌐 exposed</span>
+      {{end}}
+    </li>
+    {{end}}
+  </ul>
+</div>
+{{end}}
+{{end}}
+
 {{define "action_result"}}
 <div class="toast toast-{{.Level}}">{{.Message}}</div>
 <div id="action-output" hx-swap-oob="innerHTML">

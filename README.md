@@ -96,7 +96,8 @@ signature changes, that's the only file to touch.
 | start / stop / build | `internal.ServiceStart / ServiceStop / ServiceBuild` — the same functions the `mythic-cli start/stop/build` commands call (they expand "blank = all", regenerate the compose file, and resolve deps). Run in a child process — see below. |
 | remove service | `manager.CLIManager.RemoveServices` |
 | status (live, graphical) | docker SDK `ContainerList` (structured run/health state, instead of parsing the stdout-printing `Status`) |
-| connection / volume info | `PrintConnectionInfo` / `PrintVolumeInformation` (captured from stdout via `capture.go`) |
+| connection info (graphical) | `config.GetMythicEnv()` — same hosts/ports/SSL/bind keys `PrintConnectionInfo` prints, read as structured data (`connection.go`) and rendered as one-line rows (click the name to copy the URI) instead of a stdout table |
+| volume info | `PrintVolumeInformation` (captured from stdout via `capture.go`) |
 | config list / set | `config.GetConfigAllStrings`, `config.GetConfigHelp`, `config.SetConfigStrings` |
 | install from GitHub | `internal.InstallService(url, branch, force, keepVolume)` |
 | install from uploaded `.zip` | unzipped to a temp dir (zip-slip / zip-bomb guarded) then `internal.InstallFolder` |

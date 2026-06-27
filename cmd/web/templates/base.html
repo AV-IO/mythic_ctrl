@@ -40,6 +40,33 @@
     setTimeout(function () { if (zone.firstChild === div) { zone.innerHTML = ""; } }, 6000);
   }
 
+  // Copy-to-clipboard for elements carrying data-copy (e.g. connection URIs).
+  // Delegated so it works for content swapped in by htmx too.
+  document.body.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-copy]");
+    if (!el) { return; }
+    // For services exposed on all interfaces, the URI carries a {HOST} token —
+    // fill it with the host we're currently browsing so the copied URI is
+    // reachable from here (127.0.0.1 would not be). Kept in sync with
+    // hostPlaceholder in connection.go.
+    var text = el.getAttribute("data-copy").split("{HOST}").join(window.location.hostname);
+    function ok() { showToast("ok", "Copied to clipboard"); }
+    function fail() { showToast("error", "Could not copy to clipboard"); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, fail);
+    } else {
+      // Fallback for non-secure contexts where the Clipboard API is unavailable.
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); ok(); } catch (err) { fail(); }
+      document.body.removeChild(ta);
+    }
+  });
+
   // Auto-clear toasts that arrive via a normal swap.
   document.body.addEventListener("htmx:afterSwap", function (e) {
     if (e.target && e.target.id === "toast-zone") {

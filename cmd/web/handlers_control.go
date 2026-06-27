@@ -13,7 +13,7 @@ func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
 		"MythicServices", mythicServices,
 		"ThirdPartyServices", thirdParty,
 		"Status", liveStatus(),
-		"Connection", connectionInfoText(),
+		"Connection", connectionInfo(),
 	))
 }
 
