@@ -12,7 +12,7 @@
 
   <section class="card">
     <h2>Service control</h2>
-    <form id="control-form" class="control">
+    <form id="control-form" class="control" hx-sync="#control-form:replace">
       <label>Target services
         <input type="text" name="services" placeholder="leave blank for ALL services (e.g. mythic_server mythic_postgres)">
       </label>
@@ -21,8 +21,8 @@
         <button type="button" hx-post="/control/stop"    hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Stop</button>
         <button type="button" hx-post="/control/restart" hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Restart</button>
         <button type="button" hx-post="/control/build"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Build</button>
+        <p class="muted hint">Start/Build can take a while - the button stays disabled until completed. Clicking another action interrupts the one in progress.</p>
       </div>
-      <p class="muted hint">Start/Build can take a while — the button stays disabled until the operation finishes, then a result appears top-right and full output below.</p>
 
       <details class="action-card">
         <summary>
