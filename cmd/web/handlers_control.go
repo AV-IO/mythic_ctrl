@@ -5,31 +5,23 @@ import (
 	"strings"
 )
 
-// handleDashboard renders the main control page: service status, health, and
-// start/stop/restart/build controls.
+// handleDashboard renders the main control page: the graphical service status
+// card (live run/health state) plus start/stop/restart/build controls.
 func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	mythicServices, thirdParty := serviceNames()
 	s.renderer.page(w, "dashboard", data("dashboard",
 		"MythicServices", mythicServices,
 		"ThirdPartyServices", thirdParty,
-		"Status", statusText(false),
+		"Status", liveStatus(),
 		"Connection", connectionInfoText(),
 	))
 }
 
 // handleStatusPartial is polled by htmx (hx-trigger="every 5s") to refresh the
-// status panel without a full page reload.
+// status card without a full page reload.
 func (s *Server) handleStatusPartial(w http.ResponseWriter, r *http.Request) {
 	s.renderer.partial(w, "status_panel", map[string]any{
-		"Status": statusText(false),
-	})
-}
-
-// handleHealthPartial refreshes the health panel on demand / on a timer.
-func (s *Server) handleHealthPartial(w http.ResponseWriter, r *http.Request) {
-	services := servicesFromForm(r)
-	s.renderer.partial(w, "health_panel", map[string]any{
-		"Health": healthText(services),
+		"Status": liveStatus(),
 	})
 }
 

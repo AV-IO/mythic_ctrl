@@ -1,9 +1,34 @@
 {{define "status_panel"}}
-<pre class="console">{{.Status}}</pre>
+{{with .Status}}
+{{if .Error}}
+<p class="status-error">⚠ {{.Error}}</p>
+{{else}}
+<div class="status-summary">
+  <span class="status-count">{{.Running}}<span class="status-total">/{{.Total}}</span></span>
+  <span class="muted">running</span>
+</div>
+{{range .Groups}}{{template "status_group" .}}{{end}}
+{{end}}
+{{end}}
 {{end}}
 
-{{define "health_panel"}}
-<pre class="console">{{.Health}}</pre>
+{{define "status_group"}}
+<div class="status-group">
+  <h3 class="status-group-title">{{.Title}} <span class="status-group-count">{{len .Items}}</span></h3>
+  {{if .Items}}
+  <ul class="status-list">
+    {{range .Items}}
+    <li class="status-item state-{{.Class}}"{{if .Detail}} title="{{.Detail}}"{{end}}>
+      <span class="status-dot"></span>
+      <span class="status-name">{{.Name}}</span>
+      <span class="status-state">{{.Label}}</span>
+    </li>
+    {{end}}
+  </ul>
+  {{else}}
+  <p class="muted status-empty">None</p>
+  {{end}}
+</div>
 {{end}}
 
 {{define "action_result"}}

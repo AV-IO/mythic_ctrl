@@ -104,7 +104,6 @@ func (s *Server) routes(mux *http.ServeMux) {
 
 	// Control actions (protected). Each returns an htmx fragment / toast.
 	mux.Handle("GET /partials/status", s.requireAuth(http.HandlerFunc(s.handleStatusPartial)))
-	mux.Handle("GET /partials/health", s.requireAuth(http.HandlerFunc(s.handleHealthPartial)))
 	mux.Handle("POST /control/start", s.requireAuth(http.HandlerFunc(s.handleStart)))
 	mux.Handle("POST /control/stop", s.requireAuth(http.HandlerFunc(s.handleStop)))
 	mux.Handle("POST /control/restart", s.requireAuth(http.HandlerFunc(s.handleRestart)))

@@ -4,8 +4,11 @@
 {{template "head" .}}
 <body>
 {{template "nav" .}}
-<main class="container">
+<main class="container wide">
   <h1>Dashboard</h1>
+
+  <div class="dash-layout">
+  <div class="dash-main">
 
   <section class="card">
     <h2>Service control</h2>
@@ -20,30 +23,14 @@
         <button type="button" hx-post="/control/build"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Build</button>
       </div>
       <p class="muted hint">Start/Build can take a while — the button stays disabled until the operation finishes, then a result appears top-right and full output below.</p>
+
+      <details class="action-card">
+        <summary>
+          <h3>Last action output</h3>
+        </summary>
+        <div id="action-output"><p class="muted">Output from the most recent start, stop, restart, or build appears here.</p></div>
+      </details>
     </form>
-  </section>
-
-  <section class="card">
-    <h2>Last action output</h2>
-    <div id="action-output"><p class="muted">Output from the most recent start, stop, restart, or build appears here.</p></div>
-  </section>
-
-  <section class="card">
-    <div class="card-head">
-      <h2>Status</h2>
-      <button type="button" hx-get="/partials/status" hx-target="#status-panel" hx-swap="innerHTML" hx-disabled-elt="this" class="ghost">Refresh</button>
-    </div>
-    <div id="status-panel" hx-get="/partials/status" hx-trigger="load, every 5s" hx-swap="innerHTML">
-      {{template "status_panel" .}}
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="card-head">
-      <h2>Health</h2>
-      <button type="button" hx-get="/partials/health" hx-include="#control-form" hx-target="#health-panel" hx-swap="innerHTML" hx-disabled-elt="this" class="ghost">Run health check</button>
-    </div>
-    <div id="health-panel"></div>
   </section>
 
   <section class="card">
@@ -62,6 +49,22 @@
     {{end}}
   </section>
   {{end}}
+
+  </div><!-- /dash-main -->
+
+  <aside class="dash-side">
+    <section class="card status-card">
+      <div class="card-head">
+        <h2>Status</h2>
+        <button type="button" hx-get="/partials/status" hx-target="#status-panel" hx-swap="innerHTML" hx-disabled-elt="this" class="ghost">Refresh</button>
+      </div>
+      <div id="status-panel" hx-get="/partials/status" hx-trigger="load, every 5s" hx-swap="innerHTML">
+        {{template "status_panel" .}}
+      </div>
+    </section>
+  </aside>
+
+  </div><!-- /dash-layout -->
 </main>
 {{template "scripts" .}}
 </body>

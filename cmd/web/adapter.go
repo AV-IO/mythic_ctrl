@@ -111,17 +111,6 @@ func removeServices(services []string) error {
 	return mgr().RemoveServices(services, true)
 }
 
-// statusText returns the human-readable status table the CLI prints, captured
-// from stdout.
-func statusText(verbose bool) string {
-	return captureStdout(func() { mgr().Status(verbose) })
-}
-
-// healthText returns the health-check output, captured from stdout.
-func healthText(services []string) string {
-	return captureStdout(func() { mgr().GetHealthCheck(services) })
-}
-
 // connectionInfoText returns the printed connection info (URLs, ports).
 func connectionInfoText() string {
 	return captureStdout(func() { mgr().PrintConnectionInfo() })
