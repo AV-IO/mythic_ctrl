@@ -1,14 +1,14 @@
 # mythic-ctrl — Web GUI for `mythic-cli`
 
-A server-rendered web dashboard that drives the **same** Go logic the `mythic-cli` terminal tool uses. It adds a `webgui` subcommand and an HTTP server that imports Mythic_CLI's own packages (`cmd/internal`, `cmd/manager`, `cmd/config`) — it is a thin front-end, not a reimplementation.
+A web dashboard that wraps the `mythic-cli` tool. It adds a `webgui` subcommand and an HTTP server that imports Mythic_CLI's own packages.
 
 Features mirror the CLI surface:
 
-- Start / stop / restart / build services (all or specific containers). Each action runs out-of-process and its full docker output is captured into an on-page panel, terminal-rendered so compose's progress animation collapses to its final state instead of stacking. Buttons show an animated spinner while the action runs.
-- Live graphical status card — per-service run/health state, Mythic containers and installed services separated (htmx polling of live docker state)
-- Live log streaming per service (Server-Sent Events, via the docker SDK)
-- View and edit configuration (`.env`); password fields unmask on focus
-- Install agents / C2 profiles from GitHub/GitLab, or by uploading a `.zip`
+- Start / stop / restart / build services (all or specific containers).
+- Live graphical status card — per-service run/health state.
+- Live log streaming per service
+- View and edit configuration (`.env`)
+- Install agents / C2 profiles from GitHub or by uploading a `.zip`
 - Manage images, volumes, and database/file backup & restore
 
 ## Build & run
@@ -56,5 +56,5 @@ Then run from the Mythic root (see step 4 below).
 
 Go's `internal/` import rule means `github.com/MythicMeta/Mythic_CLI/cmd/internal` can only be imported by code **inside that same module**. So the web code cannot live in a separate module that imports Mythic_CLI — it must compile *as part of* the Mythic_CLI module to reduce replicating the existing codebase.
 
-## Security note
-**Auth** validates the submitted password against `MYTHIC_ADMIN_PASSWORD` in the local `.env`, and uses `JWT_SECRET` to give the client a JWT. If either of these are missing - you did something weird.
+## Authentication
+The site validates the submitted password against `MYTHIC_ADMIN_PASSWORD` in the local `.env`, and uses `JWT_SECRET` to give the client a JWT. If either of these are missing - you did something weird.
