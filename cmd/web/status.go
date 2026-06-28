@@ -88,31 +88,48 @@ func liveStatus() StatusModel {
 	return model
 }
 
-// coreOverall rolls the core containers up into the border colour: green only
-// when every core container is running & healthy, red the moment any is stopped
-// or unhealthy (a docker error is itself red), yellow while one is
-// transitioning, grey when there are no core containers at all.
+// coreOverall rolls the core containers up into the border colour:
+//   - green  — every core container is running & healthy
+//   - grey   — every core container is off (cleanly stopped), or there are no
+//     core containers at all
+//   - red    — a partial outage: some core containers up while others are
+//     stopped, any core container unhealthy, or docker is unreachable
+//   - yellow — converging: some core containers transitioning and none down
+//
+// (Start/Stop/Restart in progress is forced yellow separately, in CSS.)
 func coreOverall(core []ServiceStatus, dockerErr string) string {
 	if dockerErr != "" {
-		return "error"
+		return "error" // can't reach docker -> treat as a fault
 	}
 	if len(core) == 0 {
 		return "idle"
 	}
-	warn := false
+	var ok, bad, off int
 	for _, s := range core {
 		switch s.Class {
-		case "error", "idle":
-			// unhealthy OR stopped/not-started core container -> red.
-			return "error"
+		case "ok":
+			ok++
+		case "error":
+			bad++
 		case "warn":
-			warn = true
+			// transitioning; reflected via the totals below
+		default: // "idle": stopped / not started
+			off++
 		}
 	}
-	if warn {
-		return "warn"
+	total := len(core)
+	switch {
+	case bad > 0:
+		return "error" // anything unhealthy is a problem
+	case off == total:
+		return "idle" // cleanly all-off -> grey, not an alarm
+	case ok == total:
+		return "ok" // all up & healthy
+	case off == 0:
+		return "warn" // only running + transitioning, none down -> converging
+	default:
+		return "error" // partial outage: some up, some down
 	}
-	return "ok"
 }
 
 // statusFor maps each known service name to its live state, preserving the

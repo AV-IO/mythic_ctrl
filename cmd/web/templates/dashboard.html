@@ -17,9 +17,9 @@
         <input type="text" name="services" placeholder="leave blank for ALL services (e.g. mythic_server mythic_postgres)">
       </label>
       <div class="btn-row">
-        <button type="button" hx-post="/control/start"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this" class="primary">Start</button>
-        <button type="button" hx-post="/control/stop"    hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Stop</button>
-        <button type="button" hx-post="/control/restart" hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Restart</button>
+        <button type="button" hx-post="/control/start"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this" data-transition class="primary">Start</button>
+        <button type="button" hx-post="/control/stop"    hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this" data-transition>Stop</button>
+        <button type="button" hx-post="/control/restart" hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this" data-transition>Restart</button>
         <button type="button" hx-post="/control/build"   hx-include="#control-form" hx-target="#toast-zone" hx-swap="innerHTML" hx-disabled-elt="this">Build</button>
         <p class="muted hint">Start/Build can take a while - the button stays disabled until completed. Clicking another action interrupts the one in progress.</p>
       </div>

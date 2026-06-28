@@ -209,6 +209,16 @@ code { background: var(--panel-2); padding: 0.1rem 0.35rem; border-radius: 4px; 
   50% { opacity: 0.15; }
 }
 
+/* While a Start/Stop/Restart action is running, force the whole card yellow
+   (pulsing) — the system is mid-transition no matter what the live poll says.
+   htmx tags the in-flight button with .htmx-request, so this is pure CSS: no
+   event wiring to get out of sync. Overrides the :has colour and overlay glow. */
+body:has(button[data-transition].htmx-request) .status-card { border-color: var(--warn) !important; }
+body:has(button[data-transition].htmx-request) .status-overall {
+  box-shadow: 0 0 14px rgba(241, 196, 15, 0.45) !important;
+  animation: status-pulse 1.4s ease-in-out infinite !important;
+}
+
 .status-card .card-head { margin-bottom: 0.75rem; }
 .status-summary { display: flex; align-items: baseline; gap: 0.4rem; margin-bottom: 1rem; }
 .status-count { font-size: 1.8rem; font-weight: 700; line-height: 1; color: var(--ok); }
