@@ -43,6 +43,28 @@ this repo                     ->  <Mythic>/Mythic_CLI/src/
 
 ## Build & run
 
+### Recommended: `deploy.sh`
+
+The `deploy.sh` script copies the files into a Mythic checkout and (optionally)
+builds the binary using Mythic's own `make local` target — so the GUI is
+compiled with the project's toolchain and output conventions:
+
+```sh
+./deploy.sh                       # copy into ../Mythic (the default)
+./deploy.sh -b                    # copy, then build (make local)
+./deploy.sh -d /path/to/Mythic -b # custom Mythic dir, copy + build
+```
+
+| Flag                        | Effect                                                                      |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `-d`, `--mythic-dir <path>` | Path to the Mythic directory (default: `../Mythic`, relative to the script) |
+| `-b`, `--build`             | Run `make local` after copying (otherwise files are only copied)            |
+| `-h`, `--help`              | Show usage                                                                  |
+
+Then run from the Mythic root (see step 4 below).
+
+### Manual
+
 1. Clone Mythic (which contains `Mythic_CLI/src`).
 2. Copy the files in:
    ```sh
